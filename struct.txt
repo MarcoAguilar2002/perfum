@@ -1,0 +1,115 @@
+# Estructura Completa del Proyecto
+
+```
+perfumeria-app/
+├── src/
+│   ├── app/
+│   │   ├── (auth)/
+│   │   │   ├── login/
+│   │   │   │   └── page.tsx
+│   │   │   └── layout.tsx
+│   │   ├── (dashboard)/
+│   │   │   ├── dashboard/
+│   │   │   │   └── page.tsx
+│   │   │   ├── productos/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── nuevo/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── [id]/
+│   │   │   │       └── page.tsx
+│   │   │   ├── inventario/
+│   │   │   │   └── page.tsx
+│   │   │   ├── ventas/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── nueva/
+│   │   │   │       └── page.tsx
+│   │   │   ├── sedes/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [id]/
+│   │   │   │       └── page.tsx
+│   │   │   ├── clientes/
+│   │   │   │   └── page.tsx
+│   │   │   ├── reportes/
+│   │   │   │   └── page.tsx
+│   │   │   └── layout.tsx
+│   │   ├── api/
+│   │   │   └── auth/
+│   │   │       └── callback/
+│   │   │           └── route.ts
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   └── globals.css
+│   ├── components/
+│   │   ├── ui/
+│   │   │   ├── button.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── table.tsx
+│   │   │   ├── dialog.tsx
+│   │   │   └── ... (otros componentes shadcn)
+│   │   ├── dashboard/
+│   │   │   ├── sidebar.tsx
+│   │   │   ├── navbar.tsx
+│   │   │   └── stats-card.tsx
+│   │   ├── productos/
+│   │   │   ├── producto-form.tsx
+│   │   │   ├── producto-table.tsx
+│   │   │   └── producto-card.tsx
+│   │   ├── ventas/
+│   │   │   ├── venta-form.tsx
+│   │   │   └── carrito.tsx
+│   │   └── providers/
+│   │       ├── query-provider.tsx
+│   │       └── supabase-provider.tsx
+│   ├── lib/
+│   │   ├── supabase/
+│   │   │   ├── client.ts
+│   │   │   ├── server.ts
+│   │   │   └── middleware.ts
+│   │   ├── hooks/
+│   │   │   ├── useProductos.ts
+│   │   │   ├── useVentas.ts
+│   │   │   ├── useSedes.ts
+│   │   │   └── useAuth.ts
+│   │   ├── types/
+│   │   │   ├── database.types.ts
+│   │   │   └── index.ts
+│   │   └── utils.ts
+│   └── middleware.ts
+├── supabase/
+│   ├── migrations/
+│   │   └── 001_initial_schema.sql
+│   └── seed.sql
+├── .env.local
+├── .gitignore
+├── next.config.js
+├── package.json
+├── tailwind.config.ts
+└── tsconfig.json
+```
+
+## Descripción de carpetas clave:
+
+### `app/(auth)/`
+Páginas de autenticación (login, registro) con layout separado
+
+### `app/(dashboard)/`
+Páginas principales de la aplicación con sidebar compartido
+
+### `components/ui/`
+Componentes reutilizables de shadcn/ui
+
+### `components/dashboard/`
+Componentes específicos del dashboard
+
+### `lib/supabase/`
+Configuración de clientes Supabase (client-side, server-side)
+
+### `lib/hooks/`
+Custom hooks para data fetching con React Query
+
+### `lib/types/`
+Tipos TypeScript generados desde Supabase
+
+### `supabase/migrations/`
+Scripts SQL para crear la estructura de la base de datos
