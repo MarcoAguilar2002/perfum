@@ -1,5 +1,5 @@
 'use client'
-import { toast } from 'sonner'  // Importa en el componente/hook
+import { toast } from 'sonner'
 
 import { usePerfil } from '@/lib/hooks/usePerfil'
 import { useSedes } from '@/lib/hooks/useSedes'
@@ -22,8 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Shield, UserCog } from 'lucide-react'
-import { Protected } from '@/components/auth/protected'
+import { UserCog } from 'lucide-react'
 import { AddUserButton } from '@/components/usuarios/buton-user'
 
 export default function UsuariosPage() {
@@ -38,9 +37,9 @@ export default function UsuariosPage() {
       .eq('id', userId)
 
     if (error) {
-      toast.error('Error actualizando rol:', error)
-      alert('Error al actualizar el rol')
+      toast.error('Error actualizando rol: ' + error.message)
     } else {
+      toast.success('Rol actualizado correctamente')
       refetch()
     }
   }
@@ -52,14 +51,12 @@ export default function UsuariosPage() {
       .eq('id', userId)
 
     if (error) {
-      toast.error('Error actualizando sede:', error)
-      alert('Error al actualizar la sede')
+      toast.error('Error actualizando sede: ' + error.message)
     } else {
+      toast.success('Sede actualizada correctamente')
       refetch()
     }
   }
-
-
 
   return (
     <div className="space-y-6">
@@ -70,7 +67,7 @@ export default function UsuariosPage() {
             Administra roles y sedes de los usuarios
           </p>
         </div>
-        <AddUserButton onUserCreated={refetch} />  {/* Botón como componente separado */}
+        <AddUserButton onUserCreated={refetch} />
       </div>
 
       <Card>
@@ -97,18 +94,18 @@ export default function UsuariosPage() {
               <TableBody>
                 {usuarios?.map((usuario: Usuario) => (
                   <TableRow key={usuario.id}>
-                    <TableCell className="font-medium">
-                      {usuario.email}
-                    </TableCell>
+                    <TableCell className="font-medium">{usuario.email}</TableCell>
                     <TableCell>
-                      {usuario.nombre || usuario.apellido
-                        ? `${usuario.nombre} ${usuario.apellido}`
+                      {(usuario.nombre || usuario.apellido)
+                        ? `${usuario.nombre || ''} ${usuario.apellido || ''}`.trim()
                         : '-'}
                     </TableCell>
                     <TableCell>
                       <Select
                         value={usuario.rol}
-                        onValueChange={(value) => actualizarRol(usuario.id, value as 'admin' | 'gerente' | 'vendedor')}
+                        onValueChange={(value) =>
+                          actualizarRol(usuario.id, value as 'admin' | 'gerente' | 'vendedor')
+                        }
                       >
                         <SelectTrigger className="w-[140px]">
                           <SelectValue />
@@ -123,7 +120,7 @@ export default function UsuariosPage() {
                     <TableCell>
                       <Select
                         value={usuario.sede_id || 'none'}
-                        onValueChange={(value) => 
+                        onValueChange={(value) =>
                           actualizarSede(usuario.id, value === 'none' ? null : value)
                         }
                       >
@@ -141,15 +138,20 @@ export default function UsuariosPage() {
                       </Select>
                     </TableCell>
                     <TableCell>
-                      <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                        usuario.rol === 'admin'
-                          ? 'bg-red-100 text-red-700'
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                          usuario.rol === 'admin'
+                            ? 'bg-red-100 text-red-700'
+                            : usuario.rol === 'gerente'
+                            ? 'bg-blue-100 text-blue-700'
+                            : 'bg-green-100 text-green-700'
+                        }`}
+                      >
+                        {usuario.rol === 'admin'
+                          ? 'Administrador'
                           : usuario.rol === 'gerente'
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-green-100 text-green-700'
-                      }`}>
-                        {usuario.rol === 'admin' ? 'Administrador' : 
-                         usuario.rol === 'gerente' ? 'Gerente' : 'Vendedor'}
+                          ? 'Gerente'
+                          : 'Vendedor'}
                       </span>
                     </TableCell>
                   </TableRow>
