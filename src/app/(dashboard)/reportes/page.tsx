@@ -1,4 +1,5 @@
 'use client'
+import { toast } from 'sonner'  // Importa en el componente/hook
 
 import { useState, useEffect } from 'react'
 import { useReportes } from '@/lib/hooks/useReportes'
@@ -54,27 +55,30 @@ export default function ReportesPage() {
 		setFechaFin(hoy.toISOString().split('T')[0])
 	}, [])
 
-	// Cargar datos
 	const cargarReportes = async () => {
 		if (!fechaInicio || !fechaFin) return
+
+		const fechaInicioFull = `${fechaInicio}T00:00:00Z`
+		const fechaFinFull = `${fechaFin}T23:59:59.999Z`  // Fin del día para incluir ventas de hoy
 
 		setLoading(true)
 		try {
 			const sedeId = sedeSeleccionada === 'all' ? undefined : sedeSeleccionada
 
 			const [stats, productos, sedes, periodo] = await Promise.all([
-				reportes.getEstadisticasGenerales(fechaInicio, fechaFin, sedeId),
-				reportes.getProductosMasVendidos(fechaInicio, fechaFin, sedeId),
-				reportes.getVentasPorSede(fechaInicio, fechaFin),
-				reportes.getVentasPorPeriodo(fechaInicio, fechaFin, periodoGrafico),
+				reportes.getEstadisticasGenerales(fechaInicioFull, fechaFinFull, sedeId),
+				reportes.getProductosMasVendidos(fechaInicioFull, fechaFinFull, sedeId),
+				reportes.getVentasPorSede(fechaInicioFull, fechaFinFull),
+				reportes.getVentasPorPeriodo(fechaInicioFull, fechaFinFull, periodoGrafico),
 			])
 
+
 			setEstadisticas(stats)
-			setProductosMasVendidos(productos)
-			setVentasPorSede(sedes)
-			setVentasPorPeriodo(periodo)
+			setProductosMasVendidos(productos || [])
+			setVentasPorSede(sedes || [])
+			setVentasPorPeriodo(periodo || [])
 		} catch (error) {
-			console.error('Error cargando reportes:', error)
+			toast.error('Error cargando reportes:', error)
 		} finally {
 			setLoading(false)
 		}

@@ -29,15 +29,12 @@ export function Navbar() {
       </div>
       
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
-        </Button>
+       
         
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <p className="text-sm font-medium">{user?.email?.split('@')[0] || 'Usuario'}</p>
-            <p className="text-xs text-slate-500">Administrador</p>
+            <p className="text-sm font-medium">{perfil?.nombre}</p>
+            <p className="text-xs text-slate-500"> {perfil?.rol}</p>
           </div>
           <div className="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center">
             <span className="text-sm font-medium text-slate-700">

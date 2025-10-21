@@ -1,5 +1,5 @@
 'use client'
-
+import { toast } from 'sonner'  // Importa en el componente/hook
 import { useState, useEffect } from 'react'
 import { useInventario } from '@/lib/hooks/useInventario'
 import {
@@ -46,9 +46,11 @@ export function AjustarStockDialog({ open, onClose, inventario }: AjustarStockDi
         id: inventario.id,
         cantidad: cantidadAjustada,
       })
+
+      toast.success('Stock actualizado exitosamente')
       onClose()
     } catch (error) {
-      console.error('Error al ajustar stock:', error)
+      toast.error('Error al ajustar stock')
       alert('Error al ajustar el stock')
     } finally {
       setLoading(false)

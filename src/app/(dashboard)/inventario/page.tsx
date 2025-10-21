@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useInventario } from '@/lib/hooks/useInventario'
 import { useSedes } from '@/lib/hooks/useSedes'
+import { usePerfil } from '@/lib/hooks/usePerfil'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -23,8 +24,8 @@ import {
 } from '@/components/ui/select'
 import { Plus, Search, AlertTriangle, Pencil, PackagePlus, PackageMinus } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
-import { AjustarStockDialog } from '@/components/invemtario/ajustar-stock-dialog'
-import { InventarioDialog } from '../../../components/invemtario/inventario-dialog';
+import { InventarioDialog } from '@/components/invemtario/inventario-dialog'
+import { AjustarStockDialog } from '@/components/invemtario/ajustar-stock-dialog' 
 
 export default function InventarioPage() {
   const { inventario, isLoading } = useInventario()

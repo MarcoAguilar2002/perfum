@@ -40,7 +40,9 @@ export interface VentaCompleta extends Venta {
 export function useVentas() {
   const queryClient = useQueryClient()
 
-  // Obtener todas las ventas
+  // Nota: Las ventas se filtrarán automáticamente por RLS según la sede del usuario
+  // Si el usuario es vendedor, solo verá las ventas de su sede
+  // Si es admin o gerente, verá todas las ventas
   const { data: ventas, isLoading } = useQuery({
     queryKey: ['ventas'],
     queryFn: async () => {

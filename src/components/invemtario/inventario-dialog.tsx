@@ -1,5 +1,5 @@
 'use client'
-
+import { toast } from 'sonner'  // Importa en el componente/hook
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useInventario } from '@/lib/hooks/useInventario'
@@ -63,15 +63,17 @@ export function InventarioDialog({ open, onClose, inventario }: InventarioDialog
     try {
       if (inventario) {
         await updateInventario.mutateAsync({ id: inventario.id, ...data })
+        toast.success('Inventario actualizado exitosamente')
       } else {
         await createInventario.mutateAsync(data)
+        toast.success('Inventario actualizado exitosamente')
       }
       onClose()
     } catch (error: any) {
       if (error.code === '23505') {
-        alert('Ya existe un registro de inventario para este producto en esta sede')
+        toast.info('Ya existe un registro de inventario para este producto en esta sede')
       } else {
-        console.error('Error al guardar inventario:', error)
+        toast.error('Error al guardar inventario:', error)
       }
     }
   }

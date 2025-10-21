@@ -1,7 +1,8 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase/client'
+import { usePerfil } from '@/lib/hooks/usePerfil'
 
 export interface Sede {
   id: string
@@ -16,22 +17,81 @@ export interface Sede {
 }
 
 export function useSedes() {
-  const { data: sedes, isLoading } = useQuery({
+  const { isAdmin, isGerente, isLoading: perfilLoading } = usePerfil()
+  const canManageSedes = isAdmin || isGerente
+  const queryClient = useQueryClient()
+
+  // Obtener TODAS las sedes (activas e inactivas)
+  const { data: sedes, isLoading: sedesLoading } = useQuery({
     queryKey: ['sedes'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('sedes')
         .select('*')
-        .eq('activo', true)
         .order('nombre', { ascending: true })
       
       if (error) throw error
       return data as Sede[]
     },
+    enabled: true,
+  })
+
+  // Crear sede
+  const createSede = useMutation({
+    mutationFn: async (sede: Omit<Sede, 'id' | 'created_at' | 'updated_at'>) => {
+      const { data, error } = await supabase
+        .from('sedes')
+        .insert([sede])
+        .select()
+        .single()
+      
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sedes'] })
+    },
+  })
+
+  // Actualizar sede
+  const updateSede = useMutation({
+    mutationFn: async ({ id, ...sede }: Partial<Sede> & { id: string }) => {
+      const { data, error } = await supabase
+        .from('sedes')
+        .update(sede)
+        .eq('id', id)
+        .select()
+        .single()
+      
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sedes'] })
+    },
+  })
+
+  // Eliminar sede
+  const deleteSede = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('sedes')
+        .delete()
+        .eq('id', id)
+      
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sedes'] })
+    },
   })
 
   return {
     sedes,
-    isLoading,
+    isLoading: sedesLoading || perfilLoading,  // Incluye loading de perfil
+    createSede,
+    updateSede,
+    deleteSede,
+    canManageSedes,
   }
 }

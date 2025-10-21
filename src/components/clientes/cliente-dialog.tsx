@@ -1,4 +1,5 @@
 'use client'
+import { toast } from 'sonner'
 
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
@@ -46,22 +47,26 @@ export function ClienteDialog({ open, onClose, cliente }: ClienteDialogProps) {
 		try {
 			// Limpiar campos vacíos
 			const cleanData = Object.fromEntries(
-	Object.entries(data).filter(([_, v]) => v !== '')
-) as Omit<Cliente, 'created_at' | 'id'>
-	if (cliente) {
-		await updateCliente.mutateAsync({ id: cliente.id, ...cleanData })
-	} else {
-		await createCliente.mutateAsync(cleanData)
-	}
-	onClose()
-	} catch (error: any) {
-		if (error.code === '23505') {
-			alert('Ya existe un cliente con este DNI')
-		} else {
-			console.error('Error al guardar cliente:', error)
-			alert('Error al guardar el cliente')
+				Object.entries(data).filter(([_, v]) => v !== '')
+			) as Omit<Cliente, 'created_at' | 'id'>
+
+			if (cliente) {
+				await updateCliente.mutateAsync({ id: cliente.id, ...cleanData })
+				toast.success('Cliente actualizado correctamente ✅')
+			} else {
+				await createCliente.mutateAsync(cleanData)
+				toast.success('Cliente creado exitosamente 🎉')
+			}
+
+			onClose()
+		} catch (error: any) {
+			console.error(error)
+			if (error.code === '23505') {
+				toast.info('Ya existe un cliente con este DNI ⚠️')
+			} else {
+				toast.error('Error al guardar el cliente ❌')
+			}
 		}
-	}
 	}
 
 	return (
@@ -77,6 +82,7 @@ export function ClienteDialog({ open, onClose, cliente }: ClienteDialogProps) {
 							: 'Completa los datos del nuevo cliente'}
 					</DialogDescription>
 				</DialogHeader>
+
 				<form onSubmit={handleSubmit(onSubmit)}>
 					<div className="grid gap-4 py-4">
 						<div className="grid grid-cols-2 gap-4">
@@ -151,6 +157,7 @@ export function ClienteDialog({ open, onClose, cliente }: ClienteDialogProps) {
 							/>
 						</div>
 					</div>
+
 					<DialogFooter>
 						<Button type="button" variant="outline" onClick={onClose}>
 							Cancelar

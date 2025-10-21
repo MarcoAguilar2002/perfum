@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useSedes } from '@/lib/hooks/useSedes'
+import { useCategorias } from '@/lib/hooks/useCategoria'
+import { usePerfil } from '@/lib/hooks/usePerfil'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,54 +15,51 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Plus, Search, Pencil, Trash2 } from 'lucide-react'
-import { SedesDialog } from '@/components/sedes/sede-dialog' // Ajusta la ruta
+import { CategoriaDialog } from '@/components/categorias/categoria-dialog'  // Ajusta la ruta
 
-export default function SedesAdminPage() {
-  const { sedes, isLoading, deleteSede, canManageSedes } = useSedes()
+export default function CategoriasAdminPage() {
+  const { categorias, isLoading, deleteCategoria, canManageCategories } = useCategorias()
   const [searchTerm, setSearchTerm] = useState('')
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingSede, setEditingSede] = useState(null)
+  const [editingCategoria, setEditingCategoria] = useState(null)
 
-  const filteredSedes = sedes?.filter((s) =>
-    s.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.ciudad?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCategorias = categorias?.filter((c) =>
+    c.nombre.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const handleEdit = (sede: any) => {
-    setEditingSede(sede)
+  const handleEdit = (categoria: any) => {
+    setEditingCategoria(categoria)
     setDialogOpen(true)
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm('¿Estás seguro de eliminar esta sede?')) {
-      await deleteSede.mutateAsync(id)
+    if (confirm('¿Estás seguro de eliminar esta categoría?')) {
+      await deleteCategoria.mutateAsync(id)
     }
   }
 
   const handleCloseDialog = () => {
     setDialogOpen(false)
-    setEditingSede(null)
+    setEditingCategoria(null)
   }
 
-  // Solo muestra error si no está cargando y no tiene permisos
   if (isLoading) {
-    return <div className="text-center py-8">Cargando...</div>
+    return <div className="text-center py-8">Cargando categorías...</div>
   }
 
-  
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Sedes</h1>
+          <h1 className="text-3xl font-bold text-slate-900">Categorías</h1>
           <p className="text-slate-500 mt-1">
-            Gestiona las sedes de la empresa
+            Gestiona las categorías de productos
           </p>
         </div>
         <Button onClick={() => setDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Nueva Sede
+          Nueva Categoría
         </Button>
       </div>
 
@@ -71,7 +69,7 @@ export default function SedesAdminPage() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
-                placeholder="Buscar sedes..."
+                placeholder="Buscar categorías..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -81,57 +79,41 @@ export default function SedesAdminPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="text-center py-8">Cargando sedes...</div>
+            <div className="text-center py-8">Cargando categorías...</div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Nombre</TableHead>
-                  <TableHead>Dirección</TableHead>
-                  <TableHead>Teléfono</TableHead>
-                  <TableHead>Ciudad</TableHead>
-                  <TableHead>Estado</TableHead>
+                  <TableHead>Descripción</TableHead>
                   <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredSedes?.length === 0 ? (
+                {filteredCategorias?.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-slate-500">
-                      No hay sedes registradas
+                    <TableCell colSpan={3} className="text-center py-8 text-slate-500">
+                      No hay categorías registradas
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredSedes?.map((sede) => (
-                    <TableRow key={sede.id}>
-                      <TableCell className="font-medium">{sede.nombre}</TableCell>
-                      <TableCell className="max-w-xs truncate">{sede.direccion}</TableCell>
-                      <TableCell>{sede.telefono || '-'}</TableCell>
-                      <TableCell>{sede.ciudad || '-'}</TableCell>
-                      <TableCell>
-                        <span
-                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                            sede.activo
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-red-100 text-red-700'
-                          }`}
-                        >
-                          {sede.activo ? 'Activa' : 'Inactiva'}
-                        </span>
-                      </TableCell>
+                  filteredCategorias?.map((categoria) => (
+                    <TableRow key={categoria.id}>
+                      <TableCell className="font-medium">{categoria.nombre}</TableCell>
+                      <TableCell className="max-w-md truncate">{categoria.descripcion || '-'}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleEdit(sede)}
+                            onClick={() => handleEdit(categoria)}
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleDelete(sede.id)}
+                            onClick={() => handleDelete(categoria.id)}
                           >
                             <Trash2 className="h-4 w-4 text-red-500" />
                           </Button>
@@ -146,10 +128,10 @@ export default function SedesAdminPage() {
         </CardContent>
       </Card>
 
-      <SedesDialog
+      <CategoriaDialog
         open={dialogOpen}
         onClose={handleCloseDialog}
-        sede={editingSede}
+        categoria={editingCategoria}
       />
     </div>
   )

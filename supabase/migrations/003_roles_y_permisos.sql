@@ -19,6 +19,17 @@ RETURNS BOOLEAN AS $$
   );
 $$ LANGUAGE sql SECURITY DEFINER;
 
+-- Agregar columna email a perfiles (si no existe)
+ALTER TABLE perfiles 
+ADD COLUMN IF NOT EXISTS email VARCHAR(255);
+
+-- Migrar emails existentes de auth.users a perfiles (ejecuta UNA VEZ)
+UPDATE perfiles 
+SET email = u.email 
+FROM auth.users u 
+WHERE perfiles.id = u.id 
+AND perfiles.email IS NULL;  -- Solo actualiza si está vacío
+
 -- Eliminar políticas anteriores
 DROP POLICY IF EXISTS "Todos pueden ver productos" ON productos;
 DROP POLICY IF EXISTS "Todos pueden ver inventario" ON inventario;
@@ -151,12 +162,45 @@ CREATE POLICY "Solo admin puede gestionar sedes"
   TO authenticated
   USING (is_admin());
 
--- Trigger para crear perfil automáticamente al registrar usuario
-CREATE OR REPLACE FUNCTION create_profile_for_user()
+-- POLÍTICAS PARA PERFILES (agregadas y corregidas)
+-- Eliminar políticas existentes para evitar conflictos
+DROP POLICY IF EXISTS "Admins pueden ver todos los perfiles" ON perfiles;
+DROP POLICY IF EXISTS "Admins pueden actualizar perfiles" ON perfiles;
+DROP POLICY IF EXISTS "Usuarios pueden ver su perfil" ON perfiles;
+DROP POLICY IF EXISTS "Usuarios pueden actualizar su perfil" ON perfiles;
+
+-- Admins ven todos los perfiles (incluyendo emails)
+CREATE POLICY "Admins pueden ver todos los perfiles" 
+ON perfiles FOR SELECT 
+TO authenticated 
+USING (
+  is_admin() OR 
+  id = auth.uid()  -- O solo su propio perfil si no es admin
+);
+
+-- Admins pueden actualizar perfiles (roles, sedes, etc.)
+CREATE POLICY "Admins pueden actualizar perfiles" 
+ON perfiles FOR UPDATE 
+TO authenticated 
+USING (is_admin() OR id = auth.uid());
+
+-- Políticas básicas para perfiles (lectura/escritura propia para todos)
+CREATE POLICY "Usuarios pueden ver su perfil" 
+ON perfiles FOR SELECT 
+TO authenticated 
+USING (id = auth.uid());
+
+CREATE POLICY "Usuarios pueden actualizar su perfil" 
+ON perfiles FOR UPDATE 
+TO authenticated 
+USING (id = auth.uid());
+
+-- Trigger para crear perfil automáticamente al registrar usuario (actualizado con email)
+CREATE OR REPLACE FUNCTION public.create_profile_for_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO perfiles (id, rol)
-  VALUES (NEW.id, 'vendedor');
+  INSERT INTO public.perfiles (id, email, rol)
+  VALUES (NEW.id, NEW.email, 'vendedor');
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

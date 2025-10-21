@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useProductos } from '@/lib/hooks/useProductos'
+import { usePerfil } from '@/lib/hooks/usePerfil'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,13 +17,16 @@ import {
 import { Plus, Search, Pencil, Trash2 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 import { ProductoDialog } from '@/components/productos/producto-dialog'
-
+import Image from 'next/image'
 
 export default function ProductosPage() {
-  const { productos, isLoading, deleteProducto } = useProductos()
+  const { productos, isLoading, deleteProducto,isFetching } = useProductos()
+  const { isAdmin, isGerente } = usePerfil()
   const [searchTerm, setSearchTerm] = useState('')
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingProducto, setEditingProducto] = useState(null)
+
+  const canManageProducts = isAdmin || isGerente
 
   const filteredProductos = productos?.filter((p) =>
     p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -54,10 +58,12 @@ export default function ProductosPage() {
             Gestiona tu catálogo de productos
           </p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nuevo Producto
-        </Button>
+        {canManageProducts && (
+          <Button onClick={() => setDialogOpen(true)} className='cursor-pointer'>
+            <Plus className="mr-2 h-4 w-4 " />
+            Nuevo Producto
+          </Button>
+        )}
       </div>
 
       <Card>
@@ -75,25 +81,29 @@ export default function ProductosPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="text-center py-8">Cargando productos...</div>
-          ) : (
+          {(isLoading && !productos) ? (
+<div className="text-center py-8">Cargando productos...</div>
+          ) : isFetching ? (
+<div className="text-center py-2 text-sm text-slate-500">Actualizando...</div>
+) : (
+
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Nombre</TableHead>
+                  <TableHead>Imagen Ref.</TableHead>
                   <TableHead>Marca</TableHead>
                   <TableHead>Código</TableHead>
                   <TableHead>Precio Compra</TableHead>
                   <TableHead>Precio Venta</TableHead>
                   <TableHead>Estado</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
+                  {canManageProducts && <TableHead className="text-right">Acciones</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredProductos?.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-slate-500">
+                    <TableCell colSpan={canManageProducts ? 8 : 7} className="text-center py-8 text-slate-500">
                       No hay productos registrados
                     </TableCell>
                   </TableRow>
@@ -101,6 +111,21 @@ export default function ProductosPage() {
                   filteredProductos?.map((producto) => (
                     <TableRow key={producto.id}>
                       <TableCell className="font-medium">{producto.nombre}</TableCell>
+                       <TableCell className="font-medium">
+                        {producto.imagen_url ? (
+                          <Image 
+                            src={producto.imagen_url} 
+                            alt={`${producto.nombre} imagen`}
+                            width={60} 
+                            height={60}
+                            className="object-cover rounded"
+                          />
+                        ) : (
+                          <div className="w-[60px] h-[60px] bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
+                            Sin imagen
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell>{producto.marca || '-'}</TableCell>
                       <TableCell>{producto.codigo_barras || '-'}</TableCell>
                       <TableCell>{formatCurrency(producto.precio_compra)}</TableCell>
@@ -116,24 +141,26 @@ export default function ProductosPage() {
                           {producto.activo ? 'Activo' : 'Inactivo'}
                         </span>
                       </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEdit(producto)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(producto.id)}
-                          >
-                            <Trash2 className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </div>
-                      </TableCell>
+                      {canManageProducts && (
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEdit(producto)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDelete(producto.id)}
+                            >
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))
                 )}
