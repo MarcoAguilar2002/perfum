@@ -77,7 +77,7 @@ export default function ReportesPage() {
 			setProductosMasVendidos(productos || [])
 			setVentasPorSede(sedes || [])
 			setVentasPorPeriodo(periodo || [])
-		} catch (error) {
+		} catch (error:any) {
 			toast.error('Error cargando reportes:', error)
 		} finally {
 			setLoading(false)
